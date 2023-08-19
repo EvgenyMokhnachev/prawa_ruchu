@@ -3,7 +3,7 @@ interface Config {
 }
 
 const config: Config = {
-    apiUrl: 'http://localhost:8080'
+    apiUrl: 'https://api.prawaruchu.mokhnachev.org'
 }
 
 export default config;
