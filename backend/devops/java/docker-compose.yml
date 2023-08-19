@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+
+  java:
+    container_name: ${COMPOSE_PROJECT_NAME}_java
+    build:
+      context: ./../../
+      dockerfile: ./devops/java/Dockerfile
+    ports:
+      - ${DOCKER_EXPOSE_TOMCAT_PORT}:${TOMCAT_PORT}
+    networks:
+      - prawa_ruchu_network
+    volumes:
+      - ${MEDIA_DATABASE_DIRECTORY_DOCKER_OUTSIDE}:${MEDIA_DATABASE_DIRECTORY}
+      - ${QUESTIONS_XML_PATH_DOCKER_OUTSIDE}:${QUESTIONS_XML_PATH}
+    env_file:
+      - ./../../.env
+    restart: unless-stopped
+    command: java -Djava.security.egd=file:/dev/./urandom -jar /project/boot-0.0.1-SNAPSHOT.jar

@@ -1,0 +1,9 @@
+version: "3.3"
+
+networks:
+  prawa_ruchu_network:
+    name: ${COMPOSE_PROJECT_NAME}_network
+
+volumes:
+  prawa_ruchu_backend_db_data:
+    name: ${COMPOSE_PROJECT_NAME}_prawa_ruchu_backend_db_data

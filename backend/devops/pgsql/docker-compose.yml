@@ -1,0 +1,17 @@
+version: "3.3"
+
+services:
+  backend_db:
+    image: postgres:13
+    container_name: ${COMPOSE_PROJECT_NAME}_backend_db
+    restart: unless-stopped
+    networks:
+      - prawa_ruchu_network
+    ports:
+      - ${DB_EXPOSE_PORT}:5432
+    volumes:
+      - prawa_ruchu_backend_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
