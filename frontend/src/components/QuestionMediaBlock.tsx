@@ -37,7 +37,8 @@ const styles = {
 
     mediaObject: {
         borderRadius: '4px',
-        maxWidth: '750px'
+        maxWidth: '750px',
+        width: '100%'
     },
 
     videoStyles: {
