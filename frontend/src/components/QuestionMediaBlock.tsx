@@ -1,7 +1,4 @@
-import React, {StyleHTMLAttributes} from 'react';
-import {Question} from "../domain/questions/Question";
-import Button from "./Button";
-import {Style} from "util";
+import React from 'react';
 import config from "../Config";
 
 interface Props {
@@ -17,6 +14,7 @@ export default function QuestionMediaBlock(props: Props) {
         <div style={{...(props.style || {}), ...styles.wrapper}}>
             {isVideoQuestion && (
                 <video style={{...styles.videoStyles, ...styles.mediaObject}}
+                       preload={'none'}
                        controls={true}
                        src={config.apiUrl + '/getMedia/' + props.media.replace(".wmv", ".mp4")}
                 />
@@ -33,11 +31,13 @@ export default function QuestionMediaBlock(props: Props) {
 
 const styles = {
     wrapper: {
-        overflow: 'hidden'
+        overflow: 'hidden',
+        textAlign: 'center' as const,
     },
 
     mediaObject: {
         borderRadius: '4px',
+        maxWidth: '750px'
     },
 
     videoStyles: {
