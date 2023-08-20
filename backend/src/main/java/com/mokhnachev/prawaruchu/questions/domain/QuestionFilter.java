@@ -15,6 +15,7 @@ public class QuestionFilter extends BaseGetListFilter<QuestionFilter> {
     private List<KnowType> knowTypes;
     private Boolean bookmarked;
     private List<QuestionType> questionTypes;
+    private List<Integer> points;
 
     public static QuestionFilter create() {
         return new QuestionFilter();
@@ -55,6 +56,11 @@ public class QuestionFilter extends BaseGetListFilter<QuestionFilter> {
 
     public QuestionFilter byQuestionTypes(List<QuestionType> questionTypes) {
         this.questionTypes = questionTypes;
+        return this;
+    }
+
+    public QuestionFilter byPoints(List<Integer> points) {
+        this.points = points;
         return this;
     }
 }

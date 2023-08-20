@@ -9,6 +9,7 @@ import config from "./Config";
 import {QuestionType} from "./domain/questions/QuestionType";
 
 function App() {
+    const [points, setPoints] = useState<number[]>([]);
     const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
     const [bookmarked, setBookmarked] = useState<boolean>(false);
     const [goodKnow, setGoodKnow] = useState<boolean>(false);
@@ -18,6 +19,7 @@ function App() {
     const [offset, setOffset] = useState<number|null>(0);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [total, setTotal] = useState<number>(0);
+    const [readyToFetch, setReadyToFetch] = useState<boolean>(false);
 
     const fetchParamsFromUrl = () => {
         const search: URLSearchParams = new URLSearchParams(window.location.search);
@@ -35,10 +37,10 @@ function App() {
         if (uriDontKnow !== dontKnow) setDontKnow(uriDontKnow);
 
         const uriOffset: number|null = search.get("offset") ? parseInt(search.get("offset")!) : null;
-        if (uriOffset !== offset) setOffset(uriOffset);
+        if (uriOffset !== offset) setOffset(uriOffset === null || isNaN(uriOffset) ? null : uriOffset);
 
         const uriLimit: number|null = search.get("limit") ? parseInt(search.get("limit")!) : null;
-        if (uriLimit !== limit) setLimit(uriLimit);
+        if (uriLimit !== limit) setLimit(uriLimit === null || isNaN(uriLimit) ? null : uriLimit);
 
         const questionTypesUri: string|null = search.get("questionTypes");
         if (questionTypesUri !== null && questionTypesUri.length) {
@@ -52,15 +54,39 @@ function App() {
         } else {
             setQuestionTypes([]);
         }
+
+        const pointsUri: string|null = search.get("points");
+        if (pointsUri !== null && pointsUri.length) {
+            const points: string[] = pointsUri.split(',');
+            setPoints(points.map(point => parseInt(point)));
+        } else {
+            setPoints([]);
+        }
     }
 
     useEffect(() => {
         fetchParamsFromUrl();
+        setTimeout(() => {
+            setReadyToFetch(true);
+        }, 100)
     }, []);
+
+    useEffect(() => {
+        if (readyToFetch) {
+            handleOnClickFetchButton();
+        }
+    }, [readyToFetch]);
 
     const handleChangeBookmarked = (paramName: string, value: boolean|string) => {
         const search: URLSearchParams = new URLSearchParams(window.location.search);
         search.set(paramName, value + '');
+        window.history.replaceState({} , '', window.location.origin + window.location.pathname + "?" + search.toString());
+        fetchParamsFromUrl();
+    }
+
+    const handleChangePagination = (paramName: string, value: number|string) => {
+        const search: URLSearchParams = new URLSearchParams(window.location.search);
+        search.set(paramName, (isNaN(parseInt(value + '')) ? '' : parseInt(value + '')) + '');
         window.history.replaceState({} , '', window.location.origin + window.location.pathname + "?" + search.toString());
         fetchParamsFromUrl();
     }
@@ -73,11 +99,12 @@ function App() {
             dontKnow,
             limit: limit || 10,
             offset: offset || 0,
-            questionTypes
+            questionTypes,
+            points
         });
         const questions: Question[] = result.data.list;
-        setQuestions(questions);
-        setTotal(result.data.total);
+        setQuestions(questions || []);
+        setTotal(result.data.total || 0);
     }
 
     const handleChangeQuestionType = (questionType: QuestionType) => {
@@ -96,6 +123,22 @@ function App() {
         fetchParamsFromUrl();
     }
 
+    const handleChangePoint = (point: number) => {
+        const prevState = [...points];
+
+        const foundIndex = prevState.indexOf(point);
+        if (foundIndex === -1) {
+            prevState.push(point);
+        } else {
+            prevState.splice(foundIndex, 1);
+        }
+
+        const search: URLSearchParams = new URLSearchParams(window.location.search);
+        search.set('points', prevState.join(','));
+        window.history.replaceState({} , '', window.location.origin + window.location.pathname + "?" + search.toString());
+        fetchParamsFromUrl();
+    }
+
     return (
         <div>
             <div style={{display: 'flex', alignItems: 'flex-end', flexWrap: 'wrap', padding: '10px'}}>
@@ -106,9 +149,13 @@ function App() {
                 <Checkbox label={"Special"} style={{margin: '10px'}} enabled={questionTypes.indexOf(QuestionType.SPECIAL) > -1} onChange={(value: boolean) => handleChangeQuestionType(QuestionType.SPECIAL)} />
                 <Checkbox label={"Common"} style={{margin: '10px'}} enabled={questionTypes.indexOf(QuestionType.COMMON) > -1} onChange={(value: boolean) => handleChangeQuestionType(QuestionType.COMMON)} />
 
+                <Checkbox label={"1 Point"} style={{margin: '10px'}} enabled={points.indexOf(1) > -1} onChange={(value: boolean) => handleChangePoint(1)} />
+                <Checkbox label={"2 Points"} style={{margin: '10px'}} enabled={points.indexOf(2) > -1} onChange={(value: boolean) => handleChangePoint(2)} />
+                <Checkbox label={"3 Points"} style={{margin: '10px'}} enabled={points.indexOf(3) > -1} onChange={(value: boolean) => handleChangePoint(3)} />
+
                 <Checkbox label={"Bookmarked"} style={{margin: '10px'}} enabled={bookmarked} onChange={(value: boolean) => handleChangeBookmarked('bookmarked', value)} />
-                <Input label={'Limit'} style={{width: '55px', margin: '10px'}} value={limit} onChange={(value: string) => handleChangeBookmarked('limit', value)} />
-                <Input label={'Offset'} style={{width: '55px', margin: '10px'}} value={offset} onChange={(value: string) => handleChangeBookmarked('offset', value)} />
+                <Input label={'Limit'} style={{width: '55px', margin: '10px'}} value={limit} onChange={(value: string) => handleChangePagination('limit', value)} />
+                <Input label={'Offset'} style={{width: '55px', margin: '10px'}} value={offset} onChange={(value: string) => handleChangePagination('offset', value)} />
 
                 <Button label={'Fetch'} style={{margin: '10px'}} onClick={handleOnClickFetchButton} />
 
@@ -116,7 +163,7 @@ function App() {
             </div>
 
             {questions.map((question, index) => (
-                <QuestionCard question={question} key={question.id} style={{marginBottom: '15px', marginLeft: '15px', marginRight: '15px'}}/>
+                <QuestionCard question={question} key={question.id + '-' + index} style={{marginBottom: '15px', marginLeft: '15px', marginRight: '15px'}}/>
             ))}
 
             <div>

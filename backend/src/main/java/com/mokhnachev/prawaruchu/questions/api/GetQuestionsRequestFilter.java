@@ -16,4 +16,5 @@ public class GetQuestionsRequestFilter {
     private Integer limit;
     private Long offset;
     private QuestionType[] questionTypes;
+    private Integer[] points;
 }

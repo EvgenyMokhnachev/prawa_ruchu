@@ -53,11 +53,15 @@ public class QuestionsController {
         }
 
         if (getQuestionsRequestFilter.getDontKnow() != null && getQuestionsRequestFilter.getDontKnow()) {
-            filter.addKnowType(KnowType.DOT_KNOW);
+            filter.addKnowType(KnowType.DONT_KNOW);
         }
 
         if (getQuestionsRequestFilter.getQuestionTypes() != null && getQuestionsRequestFilter.getQuestionTypes().length > 0) {
             filter.byQuestionTypes(List.of(getQuestionsRequestFilter.getQuestionTypes()));
+        }
+
+        if (getQuestionsRequestFilter.getPoints() != null && getQuestionsRequestFilter.getPoints().length > 0) {
+            filter.byPoints(List.of(getQuestionsRequestFilter.getPoints()));
         }
 
         filter.byCategory(Category.A);
@@ -89,7 +93,7 @@ public class QuestionsController {
         KnowType parsedKnowType = switch (knowType) {
             case "GOOD_KNOW" -> KnowType.GOOD_KNOW;
             case "MAYBE" -> KnowType.MAYBE;
-            case "DONT_KNOW" -> KnowType.DOT_KNOW;
+            case "DONT_KNOW" -> KnowType.DONT_KNOW;
             default -> null;
         };
         if (parsedKnowType == null) return null;

@@ -41,6 +41,7 @@ public class QuestionsRepositoryByFilterPgSql extends BasePgSqlRepository<Questi
         filterByKnowTypes(filter.getKnowTypes(), baseQuery);
         filterByBookmarked(filter.getBookmarked(), baseQuery);
         filterByQuestionTypes(filter.getQuestionTypes(), baseQuery);
+        filterByPoints(filter.getPoints(), baseQuery);
 
         injectOrders(filter, baseQuery);
 
@@ -80,6 +81,12 @@ public class QuestionsRepositoryByFilterPgSql extends BasePgSqlRepository<Questi
         if (questionTypes == null || questionTypes.isEmpty()) return;
         query.addParameter("filterByQuestionTypes", questionTypes.stream().map(Enum::ordinal).collect(Collectors.toList()));
         query.addWheres(String.format(" AND (%1$s.question_type IN (:filterByQuestionTypes))", AS));
+    }
+
+    private void filterByPoints(List<Integer> points, BaseQuery query) {
+        if (points == null || points.isEmpty()) return;
+        query.addParameter("filterByPoints", points);
+        query.addWheres(String.format(" AND (%1$s.points IN (:filterByPoints))", AS));
     }
 
     private void injectOrders(QuestionFilter filter, BaseQuery query) {
