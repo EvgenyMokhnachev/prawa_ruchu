@@ -105,6 +105,7 @@ function App() {
         const questions: Question[] = result.data.list;
         setQuestions(questions || []);
         setTotal(result.data.total || 0);
+        window.scroll(0,0);
     }
 
     const handleChangeQuestionType = (questionType: QuestionType) => {
