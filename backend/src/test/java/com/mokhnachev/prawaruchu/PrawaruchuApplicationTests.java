@@ -1,6 +1,8 @@
 package com.mokhnachev.prawaruchu;
 
+import com.mokhnachev.prawaruchu.questions.domain.Category;
 import com.mokhnachev.prawaruchu.questions.domain.Question;
+import com.mokhnachev.prawaruchu.questions.domain.QuestionType;
 import com.mokhnachev.prawaruchu.questions.persistance.questions.xml.ExcelReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,17 +10,27 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest(classes = TestConfig.class)
 class PrawaruchuApplicationTests {
 
-	@Value("${application.media_database.directory_path}")
+	@Value("${application.questions_xml_path}")
 	private String mediaDatabaseDirectoryPath;
 
 	@Test
 	void contextLoads() {
 		ExcelReader excelReader = new ExcelReader();
-		List<Question> questions = excelReader.parseQuestionsXML(mediaDatabaseDirectoryPath);
+		List<Question> allQuestions = excelReader.parseQuestionsXML(mediaDatabaseDirectoryPath);
+
+		List<Question> questions = allQuestions.stream()
+				.filter(question ->
+						question.getCategories().stream().anyMatch(category -> category.equals(Category.A))
+				)
+				.filter(question ->
+						question.getQuestionType().equals(QuestionType.SPECIAL)
+				)
+				.toList();
 
 		Map<String, Integer> result = new HashMap<>();
 
@@ -32,7 +44,7 @@ class PrawaruchuApplicationTests {
 
 			for (String[] strrs : strs) {
 				for (String str : strrs) {
-					String a = str.trim().replaceAll("[^a-zA-ZćśźżęąĆŚŻŹĘĄ]", "");
+					String a = str.trim().replaceAll("[^a-zA-ZćśźżęąłĆŚŻŹĘĄŁ]", "");
 					if (a.isEmpty() || a.length() == 1) continue;
                     result.merge(a, 1, Integer::sum);
 				}
